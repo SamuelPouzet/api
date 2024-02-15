@@ -1,0 +1,20 @@
+{
+    "name": "samuelpouzet/api",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "Samuelpouzet\\Api\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "sam",
+            "email": "gandalf.blanc@yahoo.fr"
+        }
+    ],
+    "require": {
+        'lcobucci/jwt': '^5.2.0',
+        'laminas/laminas-form': '^3.19.0',
+        'laminas/laminas-crypt': '^3.11'
+    }
+}
