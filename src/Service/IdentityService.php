@@ -25,8 +25,9 @@ class IdentityService
     public function createIdentity(array $credentials): IdentityInterface
     {
         $identity = new AuthenticatedIdentity();
+        $identity->setId($credentials['id']);
         $identity->setLogin($credentials['login']);
-        $identity->setRole($credentials['role']??'');
+        $identity->setRole($credentials['role'] ?? '');
         $identity->setBearerToken($this->tokenService->generateToken());
         $identity->setRefreshToken($this->tokenService->generateToken());
 

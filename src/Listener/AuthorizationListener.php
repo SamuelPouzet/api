@@ -32,8 +32,6 @@ class AuthorizationListener
             $event->getRequest()->getHeaders()->get('Authorization')
         );
 
-        var_dump($event->getRouteMatch());
-
         if (AuthorisationResult::AUTHORIZED !== $auth->getStatus()) {
             throw new NotAuthorizedException($auth->getResponseMessage());
         }

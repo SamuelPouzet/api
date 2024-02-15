@@ -10,6 +10,10 @@ use SamuelPouzet\Api\Listener\ApiListener;
 use SamuelPouzet\Api\Listener\AuthorizationListener;
 use SamuelPouzet\Api\Listener\Factory\ApiListenerFactory;
 use SamuelPouzet\Api\Listener\Factory\AuthorizationListenerFactory;
+use SamuelPouzet\Api\Manager\Factory\TokenManagerFactory;
+use SamuelPouzet\Api\Manager\Factory\UserManagerFactory;
+use SamuelPouzet\Api\Manager\TokenManager;
+use SamuelPouzet\Api\Manager\UserManager;
 use SamuelPouzet\Api\Service\AuthorizationService;
 use SamuelPouzet\Api\Service\AuthService;
 use SamuelPouzet\Api\Service\AuthTokenService;
@@ -57,6 +61,8 @@ return [
             AuthTokenService::class => AuthTokenServiceFactory::class,
             IdentityService::class => IdentityServiceFactory::class,
             JwtService::class => JwtServiceFactory::class,
+            TokenManager::class => TokenManagerFactory::class,
+            UserManager::class => UserManagerFactory::class,
         ],
     ],
     'view_manager' => [
@@ -81,12 +87,18 @@ return [
             IndexController::class => [
                 'get' => [
                     'allowed' => true,
-                    'roles' => '*'
+                    'roles' => '*',
                 ],
                 'post' => [
                     'allowed' => false,
                 ],
             ],
+            AuthController::class => [
+                'post' => [
+                    'allowed' => true,
+                    'role' => '*',
+                ],
+            ]
         ],
     ],
 ];

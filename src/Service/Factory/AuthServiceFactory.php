@@ -3,17 +3,20 @@
 namespace SamuelPouzet\Api\Service\Factory;
 
 use Laminas\ServiceManager\Factory\FactoryInterface;
-use mysql_xdevapi\Exception;
 use Psr\Container\ContainerInterface;
+use SamuelPouzet\Api\Manager\TokenManager;
+use SamuelPouzet\Api\Manager\UserManager;
 use SamuelPouzet\Api\Service\AuthService;
+use SamuelPouzet\Api\Service\IdentityService;
 
 class AuthServiceFactory implements FactoryInterface
 {
     public function __invoke(ContainerInterface $container, $requestedName, ?array $options = null)
     {
-        $dbConfig = $container->get('config')['Authentication'];
-        $connexion = $this->configAuthDatabase($dbConfig);
-        return new AuthService($connexion);
+        $identityService = $container->get(IdentityService::class);
+        $tokenManager = $container->get(TokenManager::class);
+        $userManager = $container->get(UserManager::class);
+        return new AuthService($identityService, $tokenManager, $userManager);
     }
 
     protected function configAuthDatabase(array $config): \PDO

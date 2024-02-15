@@ -28,7 +28,7 @@ class ApiListener
     {
         try {
             $request = $event->getApplication()->getRequest();
-            $method = ucfirst(strtolower($request->getMethod()));
+            $method = strtolower($request->getMethod());
             $routeMatch = $event->getRouteMatch();
             $controller = $routeMatch->getParam('controller');
 

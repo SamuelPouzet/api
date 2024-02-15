@@ -6,7 +6,7 @@ class AuthTokenService
 {
 
     public function __construct(
-        protected array          $config
+        protected array $config
     )
     {
     }

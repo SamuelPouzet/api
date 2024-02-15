@@ -3,13 +3,16 @@
 namespace SamuelPouzet\Api\Service;
 
 use Laminas\Crypt\Password\Bcrypt;
-use SamuelPouzet\Api\Adapter\AuthenticatedIdentity;
 use SamuelPouzet\Api\Adapter\Result;
+use SamuelPouzet\Api\Manager\TokenManager;
+use SamuelPouzet\Api\Manager\UserManager;
 
 class AuthService
 {
     public function __construct(
-        protected \PDO $connexion
+        protected IdentityService $identityService,
+        protected TokenManager $tokenManager,
+        protected UserManager $userManager
     ) {
     }
 
@@ -17,10 +20,8 @@ class AuthService
     {
         $result = new Result();
 
-        $stmt = $this->connexion->prepare('select * from user where name = :login');
-        $stmt->bindValue('login', $credentials['login']);
-        $stmt->execute();
-        $challengeUser = $stmt->fetch(\PDO::FETCH_ASSOC);
+        $challengeUser = $this->userManager->getByUser($credentials['login']);
+
         if (! $challengeUser) {
             return $result
                 ->setMessage(sprintf('user not found : %1$s', $credentials['login']))
@@ -33,10 +34,14 @@ class AuthService
                 ->setCode(Result::PASSWORD_REJECTED);
         }
 
+        $identity = $this->identityService->createIdentity($challengeUser);
+        $this->tokenManager->saveAccessToken($identity);
+        $this->tokenManager->saveRefreshToken($identity);
+
         return $result
             ->setMessage('Access granted')
             ->setCode(Result::ACCESS_GRANTED)
-            ->setIdentity(new AuthenticatedIdentity($challengeUser))
+            ->setIdentity($identity)
             ;
     }
 }
