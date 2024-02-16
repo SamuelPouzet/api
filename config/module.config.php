@@ -22,8 +22,10 @@ use SamuelPouzet\Api\Service\Factory\AuthServiceFactory;
 use SamuelPouzet\Api\Service\Factory\AuthTokenServiceFactory;
 use SamuelPouzet\Api\Service\Factory\IdentityServiceFactory;
 use SamuelPouzet\Api\Service\Factory\JwtServiceFactory;
+use SamuelPouzet\Api\Service\Factory\SessionServiceFactory;
 use SamuelPouzet\Api\Service\IdentityService;
 use SamuelPouzet\Api\Service\JwtService;
+use SamuelPouzet\Api\Service\SessionService;
 
 return [
     'router' => [
@@ -61,6 +63,7 @@ return [
             AuthTokenService::class => AuthTokenServiceFactory::class,
             IdentityService::class => IdentityServiceFactory::class,
             JwtService::class => JwtServiceFactory::class,
+            SessionService::class => SessionServiceFactory::class,
             TokenManager::class => TokenManagerFactory::class,
             UserManager::class => UserManagerFactory::class,
         ],
@@ -87,18 +90,28 @@ return [
             IndexController::class => [
                 'get' => [
                     'allowed' => true,
-                    'roles' => '*',
+                    'roles' => '@',
                 ],
                 'post' => [
-                    'allowed' => false,
+                    'allowed' => true,
+                    'roles' => '*',
                 ],
             ],
             AuthController::class => [
                 'post' => [
                     'allowed' => true,
-                    'role' => '*',
+                    'roles' => '*',
                 ],
             ]
         ],
+    ],
+    'session_containers' => [
+        Laminas\Session\Container::class,
+    ],
+    'session_storage' => [
+        'type' => Laminas\Session\Storage\SessionArrayStorage::class,
+    ],
+    'session_config'  => [
+        'gc_maxlifetime' => 7200,
     ],
 ];

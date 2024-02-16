@@ -28,6 +28,14 @@ class AuthorisationResult
      *
      */
     public const MISSING_CONFIG = 4;
+    /**
+     *
+     */
+    public const NOT_ACTIVATED = 5;
+    /**
+     *
+     */
+    public const NEEDS_CONNEXION = 6;
 
     /**
      * @var int

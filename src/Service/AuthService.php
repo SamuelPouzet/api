@@ -12,7 +12,8 @@ class AuthService
     public function __construct(
         protected IdentityService $identityService,
         protected TokenManager $tokenManager,
-        protected UserManager $userManager
+        protected UserManager $userManager,
+        protected SessionService $sessionService
     ) {
     }
 
@@ -37,6 +38,7 @@ class AuthService
         $identity = $this->identityService->createIdentity($challengeUser);
         $this->tokenManager->saveAccessToken($identity);
         $this->tokenManager->saveRefreshToken($identity);
+        $this->sessionService->write('identity', $identity);
 
         return $result
             ->setMessage('Access granted')

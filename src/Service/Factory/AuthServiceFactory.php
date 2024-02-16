@@ -8,6 +8,7 @@ use SamuelPouzet\Api\Manager\TokenManager;
 use SamuelPouzet\Api\Manager\UserManager;
 use SamuelPouzet\Api\Service\AuthService;
 use SamuelPouzet\Api\Service\IdentityService;
+use SamuelPouzet\Api\Service\SessionService;
 
 class AuthServiceFactory implements FactoryInterface
 {
@@ -16,7 +17,8 @@ class AuthServiceFactory implements FactoryInterface
         $identityService = $container->get(IdentityService::class);
         $tokenManager = $container->get(TokenManager::class);
         $userManager = $container->get(UserManager::class);
-        return new AuthService($identityService, $tokenManager, $userManager);
+        $sessionService = $container->get(SessionService::class);
+        return new AuthService($identityService, $tokenManager, $userManager, $sessionService);
     }
 
     protected function configAuthDatabase(array $config): \PDO

@@ -14,7 +14,11 @@ class UserManager
 
     public function getByUser(string $login): false|array
     {
-        $sql = 'SELECT * FROM user WHERE login = :login';
+        $sql = <<<'SQL'
+SELECT * 
+FROM user u
+WHERE login = :login;
+SQL;
         $stmt = $this->connexion->prepare($sql);
         $stmt->bindValue('login', $login);
         $stmt->execute();
