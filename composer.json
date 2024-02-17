@@ -13,10 +13,13 @@
         }
     ],
     "require": {
-        'lcobucci/jwt': '^5.2.0',
-        'laminas/laminas-form': '^3.19.0',
-        'laminas/laminas-crypt': '^3.11',
+        'lcobucci/jwt': "^5.2.0",
+        'laminas/laminas-form': "^3.19.0",
+        'laminas/laminas-crypt': "^3.11",
         "laminas/laminas-session": "^2.18",
+        "doctrine/doctrine-module": "^6.1",
+        "laminas/laminas-cache": "^3.12",
+        "laminas/laminas-cache-storage-adapter-filesystem": "^2.4",
         "ext-pdo": "*"
     }
 }

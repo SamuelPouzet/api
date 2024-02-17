@@ -10,7 +10,8 @@ class AuthorizationService
 {
     public function __construct(
         protected array $config,
-        protected SessionService $sessionService
+        protected SessionService $sessionService,
+        protected RoleService $roleService
     ) {
     }
 
@@ -75,12 +76,17 @@ class AuthorizationService
             return $result;
         }
 
-//        if ($config['roles'] === '@') {
-//            // allowed for all connected users
-//            $result->setStatus(AuthorisationResult::AUTHORIZED);
-//            return $result;
-//        }
-
+        if ($config['roles'] !== '@') {
+            if($this->roleService->isRoleGranted((array) $config['roles'], $identity)) {
+                $result->setStatus(AuthorisationResult::AUTHORIZED);
+                return $result;
+            }
+            // user connected but not allowed
+            $result->setStatus(AuthorisationResult::NOT_AUTHORIZED);
+            $result->setResponseMessage('Invalid credentials');
+            return $result;
+        }
+        // only needs an authenticated user
         $result->setStatus(AuthorisationResult::AUTHORIZED);
         return $result;
     }

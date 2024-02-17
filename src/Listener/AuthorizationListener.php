@@ -5,6 +5,7 @@ namespace SamuelPouzet\Api\Listener;
 use Laminas\EventManager\EventManagerInterface;
 use Laminas\Mvc\MvcEvent;
 use SamuelPouzet\Api\Adapter\AuthorisationResult;
+use SamuelPouzet\Api\Controller\ErrorController;
 use SamuelPouzet\Api\Exception\NotAuthorizedException;
 use SamuelPouzet\Api\Service\AuthorizationService;
 
@@ -33,6 +34,7 @@ class AuthorizationListener
         );
 
         if (AuthorisationResult::AUTHORIZED !== $auth->getStatus()) {
+//            $event->getRequest()->setParam('controller', ErrorController::class);
             throw new NotAuthorizedException($auth->getResponseMessage());
         }
 
