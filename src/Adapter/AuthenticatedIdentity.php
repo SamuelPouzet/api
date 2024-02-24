@@ -12,15 +12,15 @@ class AuthenticatedIdentity implements IdentityInterface
     /**
      * @var string
      */
-    protected string $id;
+    protected int $id;
     /**
      * @var string
      */
     protected string $login;
     /**
-     * @var string
+     * @var array
      */
-    protected string $role;
+    protected array $roles;
     /**
      * @var string
      */
@@ -40,7 +40,7 @@ class AuthenticatedIdentity implements IdentityInterface
     /**
      * @return string
      */
-    public function getId(): string
+    public function getId(): int
     {
         return $this->id;
     }
@@ -49,7 +49,7 @@ class AuthenticatedIdentity implements IdentityInterface
      * @param string $id
      * @return $this
      */
-    public function setId(string $id): AuthenticatedIdentity
+    public function setId(int $id): AuthenticatedIdentity
     {
         $this->id = $id;
         return $this;
@@ -81,21 +81,14 @@ class AuthenticatedIdentity implements IdentityInterface
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getRole(): string
+    public function getRoles(): array
     {
-        return $this->role;
+        return $this->roles;
     }
 
-    /**
-     * @param string $role
-     * @return $this
-     */
-    public function setRole(string $role): AuthenticatedIdentity
+    public function setRoles(array $roles): AuthenticatedIdentity
     {
-        $this->role = $role;
+        $this->roles = $roles;
         return $this;
     }
 

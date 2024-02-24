@@ -9,22 +9,23 @@ use SamuelPouzet\Api\Adapter\AuthorisationResult;
 class AuthorizationService
 {
     public function __construct(
-        protected array $config,
+        protected array          $config,
         protected SessionService $sessionService,
-        protected RoleService $roleService
-    ) {
+        protected RoleService    $roleService
+    )
+    {
     }
 
     public function authorize(RouteMatch $routeMatch, false|Authorization $authorization): AuthorisationResult
     {
         $result = new AuthorisationResult();
 
-        $allowedByDefault = $this->config['allowedByDefault'] ?? false;
+        $allowedByDefault = (bool)$this->config['allowedByDefault'] ?? false;
 
-        $controller = $routeMatch->getParam('controller');
+        $controller = (string)$routeMatch->getParam('controller');
         $config = $this->config['controllers'][$controller] ?? null;
         //config not found
-        if (null === $config) {
+        if (count($config) === 0) {
             if ($allowedByDefault) {
                 // no config provided but allowed by default
                 $result->setStatus(AuthorisationResult::AUTHORIZED);
@@ -34,7 +35,7 @@ class AuthorizationService
             $result->setResponseMessage('No controller config provided and disallowed by default');
             return $result;
         }
-        $method = strtolower($routeMatch->getParam('action'));
+        $method = strtolower((string)$routeMatch->getParam('action'));
         $config = $config[$method] ?? null;
         //config not found
         if (null === $config) {
@@ -48,13 +49,13 @@ class AuthorizationService
             return $result;
         }
 
-        if (! isset($config['allowed'])) {
+        if (!isset($config['allowed'])) {
             $result->setStatus(AuthorisationResult::MISSING_CONFIG);
             $result->setResponseMessage('No allowed config provided stay sure to give information in configuration');
             return $result;
         }
 
-        if (! $config['allowed']) {
+        if (!$config['allowed']) {
             $result->setStatus(AuthorisationResult::NOT_ACTIVATED);
             $result->setResponseMessage('This method is not allowed for this controller');
             return $result;
@@ -67,9 +68,11 @@ class AuthorizationService
             return $result;
         }
 
-        $identity = $this->sessionService->read('identity');
+        $token = $this->getTokenValue($authorization->getFieldValue());
 
-        if(! $identity) {
+        $identity = $this->sessionService->read($token);
+
+        if (!$identity) {
             // no user connected, needs a connexion
             $result->setStatus(AuthorisationResult::NEEDS_CONNEXION);
             $result->setResponseMessage('Needs connexion');
@@ -77,7 +80,7 @@ class AuthorizationService
         }
 
         if ($config['roles'] !== '@') {
-            if($this->roleService->isRoleGranted((array) $config['roles'], $identity)) {
+            if ($this->roleService->isRoleGranted((array)$config['roles'], $identity)) {
                 $result->setStatus(AuthorisationResult::AUTHORIZED);
                 return $result;
             }
@@ -89,5 +92,13 @@ class AuthorizationService
         // only needs an authenticated user
         $result->setStatus(AuthorisationResult::AUTHORIZED);
         return $result;
+    }
+
+    protected function getTokenValue(string $token): string|null
+    {
+        if (preg_match('/Bearer\s(\S+)/', $token, $matches)) {
+            return $matches[1];
+        }
+        return null;
     }
 }

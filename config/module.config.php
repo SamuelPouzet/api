@@ -5,6 +5,7 @@ namespace SamuelPouzet\Api;
 use Application\Controller\IndexController;
 use Doctrine\DBAL\Driver\PDO\MySQL\Driver;
 use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
+use Doctrine\ORM\Mapping\Driver\AttributeDriver;
 use Laminas\Cache\Storage\Adapter\Filesystem;
 use Laminas\Router\Http\Literal;
 use SamuelPouzet\Api\Controller\AuthController;
@@ -77,7 +78,6 @@ return [
             RoleService::class => RoleServiceFactory::class,
             SessionService::class => SessionServiceFactory::class,
             TokenManager::class => TokenManagerFactory::class,
-            UserManager::class => UserManagerFactory::class,
         ],
     ],
     'view_manager' => [
@@ -161,7 +161,7 @@ return [
         ],
         'driver' => [
             __NAMESPACE__ . '_driver' => [
-                'class' => AnnotationDriver::class,
+                'class' => AttributeDriver::class,
                 'cache' => 'array',
                 'paths' => [__DIR__ . '/../src/Entity']
             ],
