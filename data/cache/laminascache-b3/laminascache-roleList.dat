@@ -1,0 +1,1 @@
+a:4:{s:9:"role.user";a:1:{i:0;s:9:"role.user";}s:10:"role.admin";a:3:{i:0;s:10:"role.admin";i:1;s:9:"role.modo";i:2;s:9:"role.user";}s:10:"role.owner";a:4:{i:0;s:10:"role.owner";i:1;s:10:"role.admin";i:2;s:9:"role.modo";i:3;s:9:"role.user";}s:9:"role.modo";a:2:{i:0;s:9:"role.modo";i:1;s:9:"role.user";}}
