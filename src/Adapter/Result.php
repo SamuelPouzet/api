@@ -24,7 +24,7 @@ class Result
     /**
      * Allright, access granted
      */
-    public const ACCESS_GRANTED = 4;
+    public const ACCESS_GRANTED = 200;
 
     /**
      * password rejected

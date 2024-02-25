@@ -3,6 +3,7 @@
 namespace SamuelPouzet\Api\Controller;
 
 use Laminas\Form\FormInterface;
+use Laminas\Http\Response;
 use Laminas\Mvc\Controller\AbstractActionController;
 use Laminas\View\Model\JsonModel;
 use SamuelPouzet\Api\Adapter\AuthenticatedIdentity;
@@ -30,6 +31,7 @@ class AuthController extends AbstractActionController
         $authForm = $this->getForm();
 
         $authForm->setData($postData);
+        $message = '';
         if ($authForm->isValid()) {
             $data = $authForm->getData();
 
@@ -38,11 +40,18 @@ class AuthController extends AbstractActionController
             if($result->getCode() === Result::ACCESS_GRANTED) {
                 return new JsonModel($result->getIdentity()->getArrayCopy());
             }
-
-            die(var_dump($result));
+            $this->getResponse()->setStatusCode($result->getCode());
+            $message = $result->getMessage();
+        }else{
+            $this->getResponse()->setStatusCode(Response::STATUS_CODE_400);
+            $message = 'formerror';
         }
 
-        return new JsonModel($postData);
+
+        return new JsonModel([
+            'status' => $this->getResponse()->getStatusCode(),
+            'message' => $message,
+        ]);
     }
 
 
