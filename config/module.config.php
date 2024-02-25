@@ -8,16 +8,21 @@ use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
 use Doctrine\ORM\Mapping\Driver\AttributeDriver;
 use Laminas\Cache\Storage\Adapter\Filesystem;
 use Laminas\Router\Http\Literal;
+use Laminas\Session\Storage\SessionArrayStorage;
+use Laminas\Session\Validator\HttpUserAgent;
+use Laminas\Session\Validator\RemoteAddr;
 use SamuelPouzet\Api\Controller\AuthController;
 use SamuelPouzet\Api\Controller\Factories\AuthControllerFactory;
 use SamuelPouzet\Api\Listener\ApiListener;
 use SamuelPouzet\Api\Listener\AuthenticationErrorListener;
 use SamuelPouzet\Api\Listener\AuthorisationErrorListener;
 use SamuelPouzet\Api\Listener\AuthorizationListener;
+use SamuelPouzet\Api\Listener\ConstantListener;
 use SamuelPouzet\Api\Listener\Factory\ApiListenerFactory;
 use SamuelPouzet\Api\Listener\Factory\AuthenticationErrorListenerFactory;
 use SamuelPouzet\Api\Listener\Factory\AuthorisationErrorListenerFactory;
 use SamuelPouzet\Api\Listener\Factory\AuthorizationListenerFactory;
+use SamuelPouzet\Api\Listener\Factory\ConstantsListenerFactory;
 use SamuelPouzet\Api\Manager\Factory\TokenManagerFactory;
 use SamuelPouzet\Api\Manager\Factory\UserManagerFactory;
 use SamuelPouzet\Api\Manager\TokenManager;
@@ -117,20 +122,35 @@ return [
             ]
         ],
     ],
-    'session_containers' => [
-        Laminas\Session\Container::class,
+    // Session configuration.
+    'session_config' => [
+        'cookie_lifetime'     => 60*60*1, // Session cookie will expire in 1 hour.
+        'gc_maxlifetime'      => 60*60*24*30, // How long to store session data on server (for 1 month).
+        'remember_me_seconds' =>  60*60*24*30, // How long to store remember_me session
+        'cookie_secure' => false,
+        'save_path' => dirname(__DIR__, 1) . '/data/session',
+        'use_cookies' => true,
     ],
+    // Session manager configuration.
+    'session_manager' => [
+        // Session validators (used for security).
+        'validators' => [
+            RemoteAddr::class,
+            HttpUserAgent::class,
+        ]
+    ],
+    // Session storage configuration.
     'session_storage' => [
-        'type' => Laminas\Session\Storage\SessionArrayStorage::class,
+        'type' => SessionArrayStorage::class
     ],
-    'session_config'  => [
-        'gc_maxlifetime' => 7200,
+    'session_containers' => [
+        \Laminas\Session\Container::class,
     ],
     'caches' => [
         'FilesystemCache' => [
             'adapter' => Filesystem::class,
             'options' => [
-                'cache_dir' => __DIR__ . '/../data/cache',
+                'cache_dir' => dirname(__DIR__, 1) . '/data/cache',
                 // Store cached data for 1 hour.
                 'ttl' => 60*60*1
             ],

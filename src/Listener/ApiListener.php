@@ -26,27 +26,14 @@ class ApiListener
 
     public function api(MvcEvent $event)
     {
-        try {
-            $request = $event->getApplication()->getRequest();
-            $method = strtolower($request->getMethod());
-            $routeMatch = $event->getRouteMatch();
-            $controller = $routeMatch->getParam('controller');
+        $request = $event->getApplication()->getRequest();
+        $method = strtolower($request->getMethod());
+        $routeMatch = $event->getRouteMatch();
+        $controller = $routeMatch->getParam('controller');
 
-            if (!method_exists($controller, $method . 'Action')) {
-                throw new MethodNotFoundException(sprintf('Method %1$s doesn\'exists in class %1$s', $method, $controller));
-            }
-            $routeMatch->setParam('action', $method);
-        } catch (\Exception $e) {
-            //$viewModel = new JsonModel([
-            //    'error' => $e->getMessage(),
-            //    "statusCode" => $e->getCode(),
-            //]);
-            //$event->setViewModel($viewModel);
-
-            $response = $event->getApplication()->getResponse();
-            $response->setStatusCode($e->getCode());
-            // $response->setContent($viewModel);
-            $event->stopPropagation(true);
+        if (!method_exists($controller, $method . 'Action')) {
+            throw new MethodNotFoundException(sprintf('Method %1$s doesn\'exists in class %1$s', $method, $controller));
         }
+        $routeMatch->setParam('action', $method);
     }
 }

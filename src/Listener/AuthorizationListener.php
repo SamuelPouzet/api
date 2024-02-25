@@ -21,7 +21,7 @@ class AuthorizationListener
     public function attach(EventManagerInterface $events, $priority = 1): void
     {
         $this->listeners[] = $events->attach(
-            MvcEvent::EVENT_DISPATCH,
+            MvcEvent::EVENT_ROUTE,
             [$this, 'authorize']
         );
     }
@@ -34,7 +34,6 @@ class AuthorizationListener
         );
 
         if (AuthorisationResult::AUTHORIZED !== $auth->getStatus()) {
-//            $event->getRequest()->setParam('controller', ErrorController::class);
             throw new NotAuthorizedException($auth->getResponseMessage());
         }
 
