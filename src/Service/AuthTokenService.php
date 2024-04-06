@@ -34,14 +34,22 @@ class AuthTokenService
         $this->entityManager->flush();
     }
 
-    public function saveRefreshToken(AuthenticatedIdentity $identity, User $user)
+    public function saveRefreshToken(AuthenticatedIdentity $identity, User $user, \DateInterval $dateInterval)
     {
         $entity = new AuthRefreshToken();
         $entity->setUserId($identity->getId());
         $entity->setUser($user);
         $entity->setRefreshToken($identity->getRefreshToken());
-        $entity->setDate(new \DateTime());
+        $entity->setExpires((new \DateTime())->add($dateInterval));
         $this->entityManager->persist($entity);
+        $this->entityManager->flush();
+    }
+
+    public function clearRefreshToken(AuthRefreshToken $token)
+    {
+        $now = new \DateTime();
+        $token->setExpires($now);
+        $this->entityManager->persist($token);
         $this->entityManager->flush();
     }
 }

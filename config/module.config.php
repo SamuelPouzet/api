@@ -12,7 +12,11 @@ use Laminas\Session\Storage\SessionArrayStorage;
 use Laminas\Session\Validator\HttpUserAgent;
 use Laminas\Session\Validator\RemoteAddr;
 use SamuelPouzet\Api\Controller\AuthController;
+use SamuelPouzet\Api\Controller\ErrorController;
 use SamuelPouzet\Api\Controller\Factories\AuthControllerFactory;
+use SamuelPouzet\Api\Controller\Factories\ErrorControllerFactory;
+use SamuelPouzet\Api\Controller\Factories\RefreshControllerFactory;
+use SamuelPouzet\Api\Controller\RefreshController;
 use SamuelPouzet\Api\Listener\ApiListener;
 use SamuelPouzet\Api\Listener\AuthenticationErrorListener;
 use SamuelPouzet\Api\Listener\AuthorisationErrorListener;
@@ -27,6 +31,8 @@ use SamuelPouzet\Api\Manager\Factory\TokenManagerFactory;
 use SamuelPouzet\Api\Manager\Factory\UserManagerFactory;
 use SamuelPouzet\Api\Manager\TokenManager;
 use SamuelPouzet\Api\Manager\UserManager;
+use SamuelPouzet\Api\Plugin\ApiProblemPlugin;
+use SamuelPouzet\Api\Plugin\Factory\ApiProblemPluginFactory;
 use SamuelPouzet\Api\Service\AuthorizationService;
 use SamuelPouzet\Api\Service\AuthService;
 use SamuelPouzet\Api\Service\AuthTokenService;
@@ -55,6 +61,16 @@ return [
                     ],
                 ],
             ],
+            'refresh' => [
+                'type' => Literal::class,
+                'options' => [
+                    'route' => '/refresh',
+                    'defaults' => [
+                        'controller' => RefreshController::class,
+                        'action' => 'index',
+                    ],
+                ],
+            ],
         ],
     ],
     'JWT' => [
@@ -63,11 +79,21 @@ return [
     'listeners' => [
         ApiListener::class,
         AuthorizationListener::class,
-        AuthorisationErrorListener::class,
+        // AuthorisationErrorListener::class,
     ],
     'controllers' => [
         'factories' => [
             AuthController::class => AuthControllerFactory::class,
+            ErrorController::class => ErrorControllerFactory::class,
+            RefreshController::class => RefreshControllerFactory::class,
+        ],
+    ],
+    'controller_plugins' => [
+        'factories' => [
+            ApiProblemPlugin::class => ApiProblemPluginFactory::class,
+        ],
+        'aliases' => [
+            'apiProblem' => ApiProblemPlugin::class,
         ],
     ],
     'service_manager' => [
@@ -114,12 +140,28 @@ return [
                     'roles' => '*',
                 ],
             ],
+            ErrorController::class => [
+                'get' => [
+                    'allowed' => true,
+                    'roles' => '*',
+                ],
+                'post' => [
+                    'allowed' => true,
+                    'roles' => '*',
+                ],
+            ],
             AuthController::class => [
                 'post' => [
                     'allowed' => true,
                     'roles' => '*',
                 ],
-            ]
+            ],
+            RefreshController::class => [
+                'post' => [
+                    'allowed' => true,
+                    'roles' => '*',
+                ],
+            ],
         ],
     ],
     // Session configuration.

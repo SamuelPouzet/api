@@ -6,6 +6,7 @@ use Doctrine\ORM\EntityManager;
 use Laminas\Crypt\Password\Bcrypt;
 use Laminas\Http\Response;
 use SamuelPouzet\Api\Adapter\Result;
+use SamuelPouzet\Api\Entity\AuthRefreshToken;
 use SamuelPouzet\Api\Entity\User;
 use SamuelPouzet\Api\Manager\TokenManager;
 
@@ -42,5 +43,46 @@ class AuthService
             ->setMessage('Access granted')
             ->setCode(Response::STATUS_CODE_200)
             ->setIdentity($identity);
+    }
+
+    public function refresh(array $postData): Result
+    {
+
+        $result = new Result();
+
+        if (! isset($postData['token'])) {
+            return $result
+                ->setMessage(sprintf('token not found'))
+                ->setCode(401);
+        }
+
+        $token = $postData['token'];
+        $refreshToken = $this->entityManager->getRepository(AuthRefreshToken::class)->findOneBy([
+            'refreshToken' => $token,
+        ]);
+
+
+        if (! $refreshToken) {
+            return $result
+                ->setMessage(sprintf('invalid token : %1$s', $token))
+                ->setCode(401);
+        }
+
+        $now = new \DateTimeImmutable();
+        if ($refreshToken->getExpires() <= $now) {
+            return $result
+                ->setMessage(sprintf('token expired: %1$s', $token))
+                ->setCode(401);
+        }
+
+        $this->identityService->closeIdentity($refreshToken);
+        $identity = $this->identityService->createIdentity($refreshToken->getUser());
+        $this->sessionService->write($identity->getBearerToken(), $identity);
+
+        return $result
+            ->setMessage('Access granted')
+            ->setCode(Response::STATUS_CODE_200)
+            ->setIdentity($identity);
+
     }
 }

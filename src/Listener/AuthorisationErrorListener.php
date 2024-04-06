@@ -21,9 +21,9 @@ class AuthorisationErrorListener
 
     public function error(MvcEvent $event)
     {
-        $exception = $event->getParam('exception');
+        $exception = $event->getError();
         $response = $event->getResponse();
-        $response->setStatusCode(Response::STATUS_CODE_403);
+        $response->setStatusCode(Response::STATUS_CODE_404);
         //$response->setContent(json_encode($exception));
         $event->stopPropagation();
     }

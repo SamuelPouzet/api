@@ -3,6 +3,7 @@
 namespace SamuelPouzet\Api\Service;
 
 use SamuelPouzet\Api\Adapter\AuthenticatedIdentity;
+use SamuelPouzet\Api\Entity\AuthRefreshToken;
 use SamuelPouzet\Api\Entity\User;
 use SamuelPouzet\Api\Interface\IdentityInterface;
 
@@ -16,7 +17,8 @@ class IdentityService
      */
     public function __construct(
         protected AuthTokenService $tokenService,
-        protected RoleService      $roleService
+        protected RoleService      $roleService,
+        protected \DateInterval    $expirationDelay,
     )
     {
     }
@@ -35,8 +37,14 @@ class IdentityService
             ->setRefreshToken($this->tokenService->generateToken());
 
         $this->tokenService->saveAuthToken($identity, $credentials);
-        $this->tokenService->saveRefreshToken($identity, $credentials);
+        $this->tokenService->saveRefreshToken($identity, $credentials, $this->expirationDelay);
 
         return $identity;
+    }
+
+    public function closeIdentity(AuthRefreshToken $token)
+    {
+        $this->tokenService->clearRefreshToken($token);
+
     }
 }

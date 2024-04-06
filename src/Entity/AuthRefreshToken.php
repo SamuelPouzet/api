@@ -23,8 +23,8 @@ class AuthRefreshToken
     #[ORM\Column(name: "refresh_token")]
     protected string $refreshToken;
 
-    #[ORM\Column(name: "date")]
-    protected \DateTime $date;
+    #[ORM\Column(name: "expires")]
+    protected \DateTime $expires;
 
     public function getId(): int
     {
@@ -70,14 +70,14 @@ class AuthRefreshToken
         return $this;
     }
 
-    public function getDate(): \DateTime
+    public function getExpires(): \DateTime
     {
-        return $this->date;
+        return $this->expires;
     }
 
-    public function setDate(\DateTime $date): AuthRefreshToken
+    public function setExpires(\DateTime $expires): AuthRefreshToken
     {
-        $this->date = $date;
+        $this->expires = $expires;
         return $this;
     }
 

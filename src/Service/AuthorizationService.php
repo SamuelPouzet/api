@@ -21,7 +21,6 @@ class AuthorizationService
         $result = new AuthorisationResult();
 
         $allowedByDefault = (bool)$this->config['allowedByDefault'] ?? false;
-
         $controller = (string)$routeMatch->getParam('controller');
         $config = $this->config['controllers'][$controller] ?? null;
         //config not found
@@ -65,6 +64,12 @@ class AuthorizationService
         if ($config['roles'] === '*') {
             // allowed for everybody
             $result->setStatus(AuthorisationResult::AUTHORIZED);
+            return $result;
+        }
+
+        if (! $authorization) {
+            // token not provided
+            $result->setStatus(AuthorisationResult::INVALID_TOKEN);
             return $result;
         }
 

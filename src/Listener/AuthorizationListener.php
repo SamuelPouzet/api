@@ -6,6 +6,7 @@ use Laminas\EventManager\EventManagerInterface;
 use Laminas\Mvc\MvcEvent;
 use SamuelPouzet\Api\Adapter\AuthorisationResult;
 use SamuelPouzet\Api\Controller\ErrorController;
+use SamuelPouzet\Api\Exception\MethodNotFoundException;
 use SamuelPouzet\Api\Exception\NotAuthorizedException;
 use SamuelPouzet\Api\Service\AuthorizationService;
 
@@ -18,24 +19,45 @@ class AuthorizationListener
     ) {
     }
 
-    public function attach(EventManagerInterface $events, $priority = 1): void
+    public function attach(EventManagerInterface $events, int $priority = 1): void
     {
         $this->listeners[] = $events->attach(
             MvcEvent::EVENT_ROUTE,
-            [$this, 'authorize']
+            [$this, 'authorize'],
+            $priority
         );
     }
 
     public function authorize(MvcEvent $event): void
     {
+        $routeMatch = $event->getRouteMatch();
+
         $auth = $this->authorizationService->authorize(
-            $event->getRouteMatch(),
+            $routeMatch,
             $event->getRequest()->getHeaders()->get('Authorization')
         );
 
         if (AuthorisationResult::AUTHORIZED !== $auth->getStatus()) {
-            throw new NotAuthorizedException($auth->getResponseMessage());
+            $routeMatch->setParam('controller', ErrorController::class);
+            $routeMatch->setParam('action', 'error');
+            $routeMatch->setParam('statusCode', 403);
+            $routeMatch->setParam('message', $auth->getResponseMessage());
+            return;
         }
+        $this->api($event);
+    }
 
+    protected function api(MvcEvent $event)
+    {
+        $request = $event->getApplication()->getRequest();
+        $method = strtolower($request->getMethod());
+        $routeMatch = $event->getRouteMatch();
+        $controller = $routeMatch->getParam('controller');
+
+        if (! method_exists($controller, $method . 'Action')) {
+            die('test');
+            throw new MethodNotFoundException(sprintf('Method %1$s doesn\'exists in class %1$s', $method, $controller));
+        }
+        $routeMatch->setParam('action', $method);
     }
 }
