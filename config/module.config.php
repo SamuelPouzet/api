@@ -15,7 +15,9 @@ use SamuelPouzet\Api\Controller\AuthController;
 use SamuelPouzet\Api\Controller\ErrorController;
 use SamuelPouzet\Api\Controller\Factories\AuthControllerFactory;
 use SamuelPouzet\Api\Controller\Factories\ErrorControllerFactory;
+use SamuelPouzet\Api\Controller\Factories\LogoutControllerFactory;
 use SamuelPouzet\Api\Controller\Factories\RefreshControllerFactory;
+use SamuelPouzet\Api\Controller\LogoutController;
 use SamuelPouzet\Api\Controller\RefreshController;
 use SamuelPouzet\Api\Listener\ApiListener;
 use SamuelPouzet\Api\Listener\AuthenticationErrorListener;
@@ -27,8 +29,10 @@ use SamuelPouzet\Api\Listener\Factory\AuthenticationErrorListenerFactory;
 use SamuelPouzet\Api\Listener\Factory\AuthorisationErrorListenerFactory;
 use SamuelPouzet\Api\Listener\Factory\AuthorizationListenerFactory;
 use SamuelPouzet\Api\Listener\Factory\ConstantsListenerFactory;
+use SamuelPouzet\Api\Manager\Factory\RefreshTokenManagerFactory;
 use SamuelPouzet\Api\Manager\Factory\TokenManagerFactory;
 use SamuelPouzet\Api\Manager\Factory\UserManagerFactory;
+use SamuelPouzet\Api\Manager\RefreshTokenManager;
 use SamuelPouzet\Api\Manager\TokenManager;
 use SamuelPouzet\Api\Manager\UserManager;
 use SamuelPouzet\Api\Plugin\ApiProblemPlugin;
@@ -36,9 +40,11 @@ use SamuelPouzet\Api\Plugin\Factory\ApiProblemPluginFactory;
 use SamuelPouzet\Api\Service\AuthorizationService;
 use SamuelPouzet\Api\Service\AuthService;
 use SamuelPouzet\Api\Service\AuthTokenService;
+use SamuelPouzet\Api\Service\CookieService;
 use SamuelPouzet\Api\Service\Factory\AuthorizationServiceFactory;
 use SamuelPouzet\Api\Service\Factory\AuthServiceFactory;
 use SamuelPouzet\Api\Service\Factory\AuthTokenServiceFactory;
+use SamuelPouzet\Api\Service\Factory\CookieServiceFactory;
 use SamuelPouzet\Api\Service\Factory\IdentityServiceFactory;
 use SamuelPouzet\Api\Service\Factory\JwtServiceFactory;
 use SamuelPouzet\Api\Service\Factory\RoleServiceFactory;
@@ -71,6 +77,16 @@ return [
                     ],
                 ],
             ],
+            'logout' => [
+                'type' => Literal::class,
+                'options' => [
+                    'route' => '/logout',
+                    'defaults' => [
+                        'controller' => LogoutController::class,
+                        'action' => 'index',
+                    ],
+                ],
+            ],
         ],
     ],
     'JWT' => [
@@ -85,6 +101,7 @@ return [
         'factories' => [
             AuthController::class => AuthControllerFactory::class,
             ErrorController::class => ErrorControllerFactory::class,
+            LogoutController::class => LogoutControllerFactory::class,
             RefreshController::class => RefreshControllerFactory::class,
         ],
     ],
@@ -104,11 +121,13 @@ return [
             AuthorisationErrorListener::class => AuthorisationErrorListenerFactory::class,
             AuthService::class => AuthServiceFactory::class,
             AuthTokenService::class => AuthTokenServiceFactory::class,
+            CookieService::class => CookieServiceFactory::class,
             IdentityService::class => IdentityServiceFactory::class,
             JwtService::class => JwtServiceFactory::class,
             RoleService::class => RoleServiceFactory::class,
             SessionService::class => SessionServiceFactory::class,
-            TokenManager::class => TokenManagerFactory::class,
+
+            RefreshTokenManager::class => RefreshTokenManagerFactory::class,
         ],
     ],
     'view_manager' => [
@@ -157,6 +176,12 @@ return [
                 ],
             ],
             RefreshController::class => [
+                'post' => [
+                    'allowed' => true,
+                    'roles' => '*',
+                ],
+            ],
+            LogoutController::class => [
                 'post' => [
                     'allowed' => true,
                     'roles' => '*',

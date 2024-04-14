@@ -15,8 +15,7 @@ class IdentityServiceFactory implements FactoryInterface
     {
         $tokenService = $container->get(AuthTokenService::class);
         $roleService = $container->get(RoleService::class);
-        $expirationDelay = new \DateInterval('P30D');// @todo récupérer dans la configuration
-        return new IdentityService($tokenService, $roleService, $expirationDelay);
+        return new IdentityService($tokenService, $roleService);
     }
 
 }

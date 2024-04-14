@@ -17,8 +17,7 @@ class IdentityService
      */
     public function __construct(
         protected AuthTokenService $tokenService,
-        protected RoleService      $roleService,
-        protected \DateInterval    $expirationDelay,
+        protected RoleService      $roleService
     )
     {
     }
@@ -29,15 +28,12 @@ class IdentityService
      */
     public function createIdentity(User $credentials): IdentityInterface
     {
+        // @todo gestion des permissions
         $identity = (new AuthenticatedIdentity())
             ->setId($credentials->getId())
-            ->setLogin($credentials->getLogin())
+            ->setUser($credentials)
             ->setRoles($this->roleService->getRolesByList($credentials->getRoles()) ?? [])
-            ->setBearerToken($this->tokenService->generateToken())
-            ->setRefreshToken($this->tokenService->generateToken());
-
-        $this->tokenService->saveAuthToken($identity, $credentials);
-        $this->tokenService->saveRefreshToken($identity, $credentials, $this->expirationDelay);
+            ;
 
         return $identity;
     }

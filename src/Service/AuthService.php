@@ -5,6 +5,7 @@ namespace SamuelPouzet\Api\Service;
 use Doctrine\ORM\EntityManager;
 use Laminas\Crypt\Password\Bcrypt;
 use Laminas\Http\Response;
+use SamuelPouzet\Api\Adapter\AuthenticatedIdentity;
 use SamuelPouzet\Api\Adapter\Result;
 use SamuelPouzet\Api\Entity\AuthRefreshToken;
 use SamuelPouzet\Api\Entity\User;
@@ -23,26 +24,30 @@ class AuthService
     public function verify(array $credentials): Result
     {
         $result = new Result();
-        $challengeUser = $this->entityManager->getRepository(User::class)->findOneBy(['login' => $credentials['login']]);
-        if (!$challengeUser) {
+        try {
+            $challengeUser = $this->entityManager->getRepository(User::class)->findOneBy(['login' => $credentials['login']]);
+            if (!$challengeUser) {
+                return $result
+                    ->setMessage(sprintf('user not found : %1$s', $credentials['login']))
+                    ->setCode(Response::STATUS_CODE_401);
+            }
+            $crypt = new Bcrypt();
+            if (!$crypt->verify($credentials['password'], $challengeUser->getPassword())) {
+                return $result
+                    ->setMessage(sprintf('password rejected: %1$s', $credentials['password']))
+                    ->setCode(Response::STATUS_CODE_401);
+            }
+
             return $result
-                ->setMessage(sprintf('user not found : %1$s', $credentials['login']))
-                ->setCode(Response::STATUS_CODE_401);
-        }
-        $crypt = new Bcrypt();
-        if (!$crypt->verify($credentials['password'], $challengeUser->getPassword())) {
+                ->setMessage('Access granted')
+                ->setCode(Response::STATUS_CODE_200)
+                ->setUser($challengeUser);
+        } catch (\Exception $exception) {
             return $result
-                ->setMessage(sprintf('password rejected: %1$s', $credentials['password']))
-                ->setCode(Response::STATUS_CODE_401);
+                ->setMessage(sprintf('Exception : %1$s', $exception->getMessage()))
+                ->setCode(Response::STATUS_CODE_500);
         }
 
-        $identity = $this->identityService->createIdentity($challengeUser);
-        $this->sessionService->write($identity->getBearerToken(), $identity);
-
-        return $result
-            ->setMessage('Access granted')
-            ->setCode(Response::STATUS_CODE_200)
-            ->setIdentity($identity);
     }
 
     public function refresh(array $postData): Result
@@ -84,5 +89,10 @@ class AuthService
             ->setCode(Response::STATUS_CODE_200)
             ->setIdentity($identity);
 
+    }
+
+    public function saveIdentity(AuthenticatedIdentity $identity): void
+    {
+        $this->sessionService->write($identity->getAccessToken(), $identity);
     }
 }

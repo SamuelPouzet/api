@@ -2,6 +2,7 @@
 
 namespace SamuelPouzet\Api\Adapter;
 
+use SamuelPouzet\Api\Entity\User;
 use SamuelPouzet\Api\Interface\IdentityInterface;
 
 /**
@@ -16,29 +17,34 @@ class AuthenticatedIdentity implements IdentityInterface
     /**
      * @var string
      */
-    protected string $login;
+    protected User $user;
     /**
      * @var array
      */
     protected array $roles;
-    /**
-     * @var string
-     */
-    protected string $bearerToken;
-    /**
-     * @var string
-     */
-    protected string $refreshToken;
 
     /**
-     * @param array $data
+     * @var ?string
      */
+    protected ?string $access_token;
+
+    /**
+     * @var ?\DateTime
+     */
+    protected ?\DateTime $access_token_expiration;
+
+    /**
+     * @var ?string
+     */
+    protected ?string $refresh_token;
+
+
     public function __construct()
     {
     }
 
     /**
-     * @return string
+     * @return int
      */
     public function getId(): int
     {
@@ -63,23 +69,18 @@ class AuthenticatedIdentity implements IdentityInterface
         return get_object_vars($this);
     }
 
-    /**
-     * @return string
-     */
-    public function getLogin(): string
+    public function getUser(): User
     {
-        return $this->login;
+        return $this->user;
     }
 
-    /**
-     * @param string $login
-     * @return $this
-     */
-    public function setLogin(string $login): AuthenticatedIdentity
+    public function setUser(User $user): AuthenticatedIdentity
     {
-        $this->login = $login;
+        $this->user = $user;
         return $this;
     }
+
+
 
     public function getRoles(): array
     {
@@ -92,39 +93,37 @@ class AuthenticatedIdentity implements IdentityInterface
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getBearerToken(): string
+    public function getAccessToken(): string
     {
-        return $this->bearerToken;
+        return $this->access_token;
     }
 
-    /**
-     * @param string $bearerToken
-     * @return $this
-     */
-    public function setBearerToken(string $bearerToken): AuthenticatedIdentity
+    public function setAccessToken(string $access_token): AuthenticatedIdentity
     {
-        $this->bearerToken = $bearerToken;
+        $this->access_token = $access_token;
         return $this;
     }
 
-    /**
-     * @return string
-     */
+    public function getAccessTokenExpiration(): \DateTime
+    {
+        return $this->access_token_expiration;
+    }
+
+    public function setAccessTokenExpiration(\DateTime $access_token_expiration): AuthenticatedIdentity
+    {
+        $this->access_token_expiration = $access_token_expiration;
+        return $this;
+    }
+
     public function getRefreshToken(): string
     {
-        return $this->refreshToken;
+        return $this->refresh_token;
     }
 
-    /**
-     * @param string $refreshToken
-     * @return $this
-     */
-    public function setRefreshToken(string $refreshToken): AuthenticatedIdentity
+    public function setRefreshToken(string $refresh_token): AuthenticatedIdentity
     {
-        $this->refreshToken = $refreshToken;
+        $this->refresh_token = $refresh_token;
         return $this;
     }
+
 }

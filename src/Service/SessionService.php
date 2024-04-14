@@ -26,4 +26,9 @@ class SessionService
     {
         return $this->sessionContainer->$key ?? null;
     }
+
+    public function remove(string $key): void
+    {
+        $this->sessionContainer->getManager()->getStorage()->clear($key);
+    }
 }

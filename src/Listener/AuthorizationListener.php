@@ -30,13 +30,9 @@ class AuthorizationListener
 
     public function authorize(MvcEvent $event): void
     {
+
+        $auth = $this->authorizationService->authorize($event);
         $routeMatch = $event->getRouteMatch();
-
-        $auth = $this->authorizationService->authorize(
-            $routeMatch,
-            $event->getRequest()->getHeaders()->get('Authorization')
-        );
-
         if (AuthorisationResult::AUTHORIZED !== $auth->getStatus()) {
             $routeMatch->setParam('controller', ErrorController::class);
             $routeMatch->setParam('action', 'error');

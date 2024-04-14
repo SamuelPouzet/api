@@ -2,23 +2,28 @@
 
 namespace SamuelPouzet\Api\Service;
 
-use Laminas\Router\RouteMatch;
-use Laminas\Http\Header\Authorization;
+use Laminas\Mvc\MvcEvent;
+use Laminas\Stdlib\RequestInterface;
 use SamuelPouzet\Api\Adapter\AuthorisationResult;
+use SamuelPouzet\Api\Trait\ParseCookie;
 
 class AuthorizationService
 {
+    use ParseCookie;
+
     public function __construct(
         protected array          $config,
         protected SessionService $sessionService,
-        protected RoleService    $roleService
+        protected RoleService    $roleService,
+        protected JwtService     $jwtService
     )
     {
     }
 
-    public function authorize(RouteMatch $routeMatch, false|Authorization $authorization): AuthorisationResult
+    public function authorize(MvcEvent $event): AuthorisationResult
     {
         $result = new AuthorisationResult();
+        $routeMatch = $event->getRouteMatch();
 
         $allowedByDefault = (bool)$this->config['allowedByDefault'] ?? false;
         $controller = (string)$routeMatch->getParam('controller');
@@ -60,22 +65,25 @@ class AuthorizationService
             return $result;
         }
 
-        //@ todo check bearer and roles
         if ($config['roles'] === '*') {
             // allowed for everybody
             $result->setStatus(AuthorisationResult::AUTHORIZED);
             return $result;
         }
 
-        if (! $authorization) {
+        $authCookie=$this->getCookie($event->getRequest(), 'authCookie');
+
+
+        if (! $authCookie ) {
             // token not provided
             $result->setStatus(AuthorisationResult::INVALID_TOKEN);
             return $result;
         }
 
-        $token = $this->getTokenValue($authorization->getFieldValue());
+        //@ todo verify token
+        $token = $this->jwtService->parse($authCookie);
 
-        $identity = $this->sessionService->read($token);
+        $identity = $this->sessionService->read($token->claims()->get('access_token'));
 
         if (!$identity) {
             // no user connected, needs a connexion
@@ -99,6 +107,7 @@ class AuthorizationService
         return $result;
     }
 
+    //@todo check and remove
     protected function getTokenValue(string $token): string|null
     {
         if (preg_match('/Bearer\s(\S+)/', $token, $matches)) {

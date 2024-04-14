@@ -2,6 +2,7 @@
 
 namespace SamuelPouzet\Api\Adapter;
 
+use SamuelPouzet\Api\Entity\User;
 use SamuelPouzet\Api\Interface\IdentityInterface;
 
 class Result
@@ -37,9 +38,9 @@ class Result
     protected int $code;
 
     /**
-     * @var ?IdentityInterface
+     * @var ?User
      */
-    protected ?IdentityInterface $identity;
+    protected ?User $user;
 
     /**
      * @var string
@@ -73,15 +74,16 @@ class Result
         return $this;
     }
 
-    public function getIdentity(): ?IdentityInterface
+    public function getUser(): ?User
     {
-        return $this->identity;
+        return $this->user;
     }
 
-    public function setIdentity(IdentityInterface $identity): Result
+    public function setUser(?User $user): Result
     {
-        $this->identity = $identity;
+        $this->user = $user;
         return $this;
     }
+
 
 }

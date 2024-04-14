@@ -10,7 +10,7 @@ use SamuelPouzet\Api\Service\AuthService;
 
 class RefreshControllerFactory implements FactoryInterface
 {
-    public function __invoke(ContainerInterface $container, $requestedName, ?array $options = null)
+    public function __invoke(ContainerInterface $container, $requestedName, ?array $options = null): RefreshController
     {
         $authService = $container->get(AuthService::class);
 

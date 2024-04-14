@@ -3,6 +3,7 @@
 namespace SamuelPouzet\Api\Listener;
 
 use Laminas\EventManager\EventManagerInterface;
+use Laminas\Http\Headers;
 use Laminas\Mvc\MvcEvent;
 use SamuelPouzet\Api\Controller\ErrorController;
 use SamuelPouzet\Api\Exception\MethodNotFoundException;
@@ -45,5 +46,4 @@ class ApiListener
         }
         $routeMatch->setParam('action', $method);
     }
-
 }
