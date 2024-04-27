@@ -2,22 +2,19 @@
 
 namespace SamuelPouzet\Api\Service;
 
-use Laminas\Http\Request;
 use Laminas\Mvc\MvcEvent;
-use Laminas\Stdlib\RequestInterface;
 use SamuelPouzet\Api\Adapter\AuthorisationResult;
-use SamuelPouzet\Api\Entity\User;
-use SamuelPouzet\Api\Interface\UserInterface;
 use SamuelPouzet\Api\Trait\ParseCookie;
 
-class AuthorizationService
+class AuthorizationService2
 {
     use ParseCookie;
 
     public function __construct(
         protected IdentityService  $identityService,
-        protected UserService      $userService,
+        protected SessionService   $sessionService,
         protected RoleService      $roleService,
+        protected JwtService       $jwtService,
         protected array            $config,
     )
     {
@@ -30,11 +27,10 @@ class AuthorizationService
         $routeMatch = $event->getRouteMatch();
 
         // première chose, on regarde si on a un utilisateur connecté
-        $currentUser = $this->currentUser($event->getRequest());
+        $currentUser = $this->currentUser();
 
-        if($currentUser) {
-            $this->identityService->createIdentity($currentUser);
-        }
+
+
 
         $allowedByDefault = (bool)$this->config['allowedByDefault'] ?? false;
         $controller = (string)$routeMatch->getParam('controller');
@@ -50,7 +46,6 @@ class AuthorizationService
             $result->setResponseMessage('No controller config provided and disallowed by default');
             return $result;
         }
-
         $method = strtolower((string)$routeMatch->getParam('action'));
         $config = $config[$method] ?? null;
         //config not found
@@ -83,14 +78,27 @@ class AuthorizationService
             return $result;
         }
 
-        if (! $currentUser) {
+        // @todo utiliser le userService
+        $authCookie=$this->getCookie($event->getRequest(), 'authCookie');
+
+        if (! $authCookie ) {
+            // token not provided
+            $result->setStatus(AuthorisationResult::INVALID_TOKEN);
+            return $result;
+        }
+
+        // @todo verify token
+        $token = $this->jwtService->parse($authCookie);
+
+        $identity = $this->sessionService->read($token->claims()->get('access_token'));
+
+        if (!$identity) {
             // no user connected, needs a connexion
             $result->setStatus(AuthorisationResult::NEEDS_CONNEXION);
             $result->setResponseMessage('Needs connexion');
             return $result;
         }
 
-        $identity =  $this->identityService->getIdentity();
         if ($config['roles'] !== '@') {
             if ($this->roleService->isRoleGranted((array)$config['roles'], $identity)) {
                 $result->setStatus(AuthorisationResult::AUTHORIZED);
@@ -106,9 +114,9 @@ class AuthorizationService
         return $result;
     }
 
-    protected function currentUser(RequestInterface $request): ?UserInterface
+    protected function currentUser()
     {
-        return $this->userService->getCurrentUser($request);
+
     }
 
 }

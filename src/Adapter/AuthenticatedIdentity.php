@@ -2,8 +2,8 @@
 
 namespace SamuelPouzet\Api\Adapter;
 
-use SamuelPouzet\Api\Entity\User;
 use SamuelPouzet\Api\Interface\IdentityInterface;
+use SamuelPouzet\Api\Interface\UserInterface;
 
 /**
  *
@@ -15,9 +15,9 @@ class AuthenticatedIdentity implements IdentityInterface
      */
     protected int $id;
     /**
-     * @var string
+     * @var UserInterface
      */
-    protected User $user;
+    protected UserInterface $user;
     /**
      * @var array
      */
@@ -41,6 +41,16 @@ class AuthenticatedIdentity implements IdentityInterface
 
     public function __construct()
     {
+    }
+
+    public function exportIdentity(): array
+    {
+        return [
+            'id' => $this->getId(),
+            'login' => $this->getUser()->getLogin(),
+            'mail' => $this->getUser()->getMail(),
+            'roles' => $this->getRoles()
+        ];
     }
 
     /**
@@ -69,12 +79,12 @@ class AuthenticatedIdentity implements IdentityInterface
         return get_object_vars($this);
     }
 
-    public function getUser(): User
+    public function getUser(): UserInterface
     {
         return $this->user;
     }
 
-    public function setUser(User $user): AuthenticatedIdentity
+    public function setUser(UserInterface $user): AuthenticatedIdentity
     {
         $this->user = $user;
         return $this;

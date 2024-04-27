@@ -3,7 +3,7 @@
 namespace SamuelPouzet\Api;
 
 use Laminas\Mvc\MvcEvent;
-use SamuelPouzet\Api\Listener\ApiListener;
+use SamuelPouzet\Api\Listener\RouteListener;
 
 class Module
 {

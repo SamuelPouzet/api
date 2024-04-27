@@ -9,7 +9,7 @@ trait ParseCookie
     private function getCookie(RequestInterface $request, string $name): string
     {
         $cookie = $request->getCookie();
-        if ($cookie->offsetExists($name)) {
+        if ($cookie && $cookie->offsetExists($name)) {
             return $cookie->offsetGet($name);
         }
         return '';

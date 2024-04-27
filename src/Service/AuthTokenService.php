@@ -5,7 +5,8 @@ namespace SamuelPouzet\Api\Service;
 use Doctrine\ORM\EntityManager;
 use SamuelPouzet\Api\Adapter\AuthenticatedIdentity;
 use SamuelPouzet\Api\Entity\AuthRefreshToken;
-use SamuelPouzet\Api\Entity\User;
+use SamuelPouzet\Api\Interface\IdentityInterface;
+use SamuelPouzet\Api\Interface\UserInterface;
 
 class AuthTokenService
 {
@@ -24,7 +25,7 @@ class AuthTokenService
         return bin2hex(random_bytes($this->config['length']));
     }
 
-    public function generateTokens(AuthenticatedIdentity $identity): JwtService
+    public function generateTokens(IdentityInterface $identity): JwtService
     {
         $identity->setAccessToken($this->generateToken());
         $identity->setRefreshToken($this->generateToken());
@@ -44,11 +45,10 @@ class AuthTokenService
                 ->addClaim('refresh_token', $identity->getRefreshToken())
                 ->setExpiration(new \DateInterval('P1Y'))
             ;
-
     }
 
 
-    public function saveRefreshToken(User $user, \DateInterval $dateInterval, string $token)
+    public function saveRefreshToken(UserInterface $user, \DateInterval $dateInterval, string $token)
     {
         // @todo déplacer dans le manager ad hoc
         $entity = new AuthRefreshToken();

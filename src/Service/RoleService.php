@@ -7,6 +7,7 @@ use Doctrine\ORM\PersistentCollection;
 use Laminas\Cache\Storage\Adapter\Filesystem;
 use SamuelPouzet\Api\Adapter\AuthenticatedIdentity;
 use SamuelPouzet\Api\Entity\Role;
+use SamuelPouzet\Api\Interface\IdentityInterface;
 
 class RoleService
 {
@@ -21,7 +22,7 @@ class RoleService
         $this->init();
     }
 
-    public function isRoleGranted(array $roles, AuthenticatedIdentity $identity): bool
+    public function isRoleGranted(array $roles, IdentityInterface $identity): bool
     {
 
         if ($this->roleList === null) {

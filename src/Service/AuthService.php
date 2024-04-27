@@ -8,15 +8,14 @@ use Laminas\Http\Response;
 use SamuelPouzet\Api\Adapter\AuthenticatedIdentity;
 use SamuelPouzet\Api\Adapter\Result;
 use SamuelPouzet\Api\Entity\AuthRefreshToken;
-use SamuelPouzet\Api\Entity\User;
-use SamuelPouzet\Api\Manager\TokenManager;
 
 class AuthService
 {
     public function __construct(
         protected IdentityService $identityService,
         protected EntityManager   $entityManager,
-        protected SessionService  $sessionService
+        protected SessionService  $sessionService,
+        protected string $userEntity
     )
     {
     }
@@ -25,7 +24,7 @@ class AuthService
     {
         $result = new Result();
         try {
-            $challengeUser = $this->entityManager->getRepository(User::class)->findOneBy(['login' => $credentials['login']]);
+            $challengeUser = $this->entityManager->getRepository($this->userEntity)->findOneBy(['login' => $credentials['login']]);
             if (!$challengeUser) {
                 return $result
                     ->setMessage(sprintf('user not found : %1$s', $credentials['login']))

@@ -2,10 +2,10 @@
 
 namespace SamuelPouzet\Api\Controller;
 
-use Laminas\Mvc\Controller\AbstractActionController;
+use \SamuelPouzet\Api\Controller\AbstractJsonController;
 use Laminas\View\Model\JsonModel;
 
-class ErrorController extends AbstractActionController
+class ErrorController extends AbstractJsonController
 {
     public function __construct()
     {

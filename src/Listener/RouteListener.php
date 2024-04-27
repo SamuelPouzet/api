@@ -5,10 +5,11 @@ namespace SamuelPouzet\Api\Listener;
 use Laminas\EventManager\EventManagerInterface;
 use Laminas\Http\Headers;
 use Laminas\Mvc\MvcEvent;
+use Laminas\Router\RouteMatch;
 use SamuelPouzet\Api\Controller\ErrorController;
 use SamuelPouzet\Api\Exception\MethodNotFoundException;
 
-class ApiListener
+class RouteListener
 {
 
     protected array $listeners;
@@ -22,16 +23,15 @@ class ApiListener
     {
         $this->listeners[] = $events->attach(
             MvcEvent::EVENT_ROUTE,
-            [$this, 'api'],
+            [$this, 'route'],
             $priority
         );
     }
 
-    public function api(MvcEvent $event)
+    public function route(MvcEvent $event)
     {
-        $request = $event->getApplication()->getRequest();
-        $method = strtolower($request->getMethod());
         $routeMatch = $event->getRouteMatch();
+        $method = $this->getAction($event);
 
         $controller = $routeMatch->getParam('controller');
         if (
@@ -45,5 +45,18 @@ class ApiListener
             return;
         }
         $routeMatch->setParam('action', $method);
+    }
+
+    protected function getAction(MvcEvent $event): string
+    {
+        $request = $event->getApplication()->getRequest();
+        $method = strtolower($request->getMethod());
+        if($method === 'get' || $method === 'GET') {
+            if (null === $event->getRouteMatch()->getParam('id')) {
+                $method = 'getAll';
+            }
+        }
+
+        return $method;
     }
 }

@@ -19,6 +19,8 @@ use SamuelPouzet\Api\Controller\Factories\LogoutControllerFactory;
 use SamuelPouzet\Api\Controller\Factories\RefreshControllerFactory;
 use SamuelPouzet\Api\Controller\LogoutController;
 use SamuelPouzet\Api\Controller\RefreshController;
+use SamuelPouzet\Api\Entity\User;
+use SamuelPouzet\Api\Interface\UserInterface;
 use SamuelPouzet\Api\Listener\ApiListener;
 use SamuelPouzet\Api\Listener\AuthenticationErrorListener;
 use SamuelPouzet\Api\Listener\AuthorisationErrorListener;
@@ -36,7 +38,9 @@ use SamuelPouzet\Api\Manager\RefreshTokenManager;
 use SamuelPouzet\Api\Manager\TokenManager;
 use SamuelPouzet\Api\Manager\UserManager;
 use SamuelPouzet\Api\Plugin\ApiProblemPlugin;
+use SamuelPouzet\Api\Plugin\CurrentUserPlugin;
 use SamuelPouzet\Api\Plugin\Factory\ApiProblemPluginFactory;
+use SamuelPouzet\Api\Plugin\Factory\CurrentUserPluginFactory;
 use SamuelPouzet\Api\Service\AuthorizationService;
 use SamuelPouzet\Api\Service\AuthService;
 use SamuelPouzet\Api\Service\AuthTokenService;
@@ -49,10 +53,12 @@ use SamuelPouzet\Api\Service\Factory\IdentityServiceFactory;
 use SamuelPouzet\Api\Service\Factory\JwtServiceFactory;
 use SamuelPouzet\Api\Service\Factory\RoleServiceFactory;
 use SamuelPouzet\Api\Service\Factory\SessionServiceFactory;
+use SamuelPouzet\Api\Service\Factory\UserServiceFactory;
 use SamuelPouzet\Api\Service\IdentityService;
 use SamuelPouzet\Api\Service\JwtService;
 use SamuelPouzet\Api\Service\RoleService;
 use SamuelPouzet\Api\Service\SessionService;
+use SamuelPouzet\Api\Service\UserService;
 
 return [
     'router' => [
@@ -108,9 +114,11 @@ return [
     'controller_plugins' => [
         'factories' => [
             ApiProblemPlugin::class => ApiProblemPluginFactory::class,
+            CurrentUserPlugin::class => CurrentUserPluginFactory::class,
         ],
         'aliases' => [
             'apiProblem' => ApiProblemPlugin::class,
+            'myUser' => CurrentUserPlugin::class,
         ],
     ],
     'service_manager' => [
@@ -126,9 +134,18 @@ return [
             JwtService::class => JwtServiceFactory::class,
             RoleService::class => RoleServiceFactory::class,
             SessionService::class => SessionServiceFactory::class,
+            UserService::class => UserServiceFactory::class,
 
             RefreshTokenManager::class => RefreshTokenManagerFactory::class,
         ],
+        'aliases' => [
+            'identity.service' => IdentityService::class,
+            'user.service' => UserService::class,
+            'role.service' => RoleService::class,
+        ],
+    ],
+    'entities' => [
+        'user' => User::class,
     ],
     'view_manager' => [
         'strategies' => [
@@ -137,8 +154,8 @@ return [
     ],
     'Authentication' => [
         'database' => [
-            'adapter'  => \PDO::class,
-            'dsn'      => 'mysql:host=localhost;dbname=api',
+            'adapter' => \PDO::class,
+            'dsn' => 'mysql:host=localhost;dbname=api',
             'username' => 'root',
             'password' => '0000',
         ],
@@ -191,9 +208,8 @@ return [
     ],
     // Session configuration.
     'session_config' => [
-        'cookie_lifetime'     => 60*60*1, // Session cookie will expire in 1 hour.
-        'gc_maxlifetime'      => 60*60*24*30, // How long to store session data on server (for 1 month).
-        'remember_me_seconds' =>  60*60*24*30, // How long to store remember_me session
+        'cookie_lifetime' => 60 * 60 * 1, // Session cookie will expire in 1 hour.
+        'gc_maxlifetime' => 60 * 60 * 24 * 30, // How long to store session data on server (for 1 month).
         'cookie_secure' => false,
         'save_path' => dirname(__DIR__, 1) . '/data/session',
         'use_cookies' => true,
@@ -219,7 +235,7 @@ return [
             'options' => [
                 'cache_dir' => dirname(__DIR__, 1) . '/data/cache',
                 // Store cached data for 1 hour.
-                'ttl' => 60*60*1
+                'ttl' => 60 * 60 * 1
             ],
             'plugins' => [
                 [
@@ -231,15 +247,30 @@ return [
         ],
     ],
     'doctrine' => [
+        'migrations_configuration' => [
+            'orm_default' => [
+                'directory' => __DIR__ . '/../data/Migrations',
+                'name' => 'Doctrine Database Migrations',
+                'namespace' => 'Migrations',
+                'table' => 'migrations',
+            ],
+        ],
+        'entity_resolver' => [
+            'orm_default' => [
+                'resolvers' => [
+                    UserInterface::class => User::class,
+                ]
+            ],
+        ],
         'connection' => [
             'orm_default' => [
                 'driverClass' => Driver::class,
-                'params'        => [
-                    'host'     => 'localhost',
-                    'port'     => '3306',
-                    'user'     => 'root',
+                'params' => [
+                    'host' => 'localhost',
+                    'port' => '3306',
+                    'user' => 'root',
                     'password' => '0000',
-                    'dbname'   => 'api',
+                    'dbname' => 'api',
                     'driverOptions' => [
                         1002 => 'SET NAMES utf8',
                     ],

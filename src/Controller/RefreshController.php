@@ -2,14 +2,12 @@
 
 namespace SamuelPouzet\Api\Controller;
 
-use Laminas\Http\Response;
-use Laminas\Mvc\Controller\AbstractActionController;
+use \SamuelPouzet\Api\Controller\AbstractJsonController;
 use Laminas\View\Model\JsonModel;
 use SamuelPouzet\Api\Adapter\Result;
-use SamuelPouzet\Api\Entity\AuthRefreshToken;
 use SamuelPouzet\Api\Service\AuthService;
 
-class RefreshController extends AbstractActionController
+class RefreshController extends AbstractJsonController
 {
     public function __construct(
         protected AuthService $authService,

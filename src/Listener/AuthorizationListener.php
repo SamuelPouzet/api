@@ -51,7 +51,6 @@ class AuthorizationListener
         $controller = $routeMatch->getParam('controller');
 
         if (! method_exists($controller, $method . 'Action')) {
-            die('test');
             throw new MethodNotFoundException(sprintf('Method %1$s doesn\'exists in class %1$s', $method, $controller));
         }
         $routeMatch->setParam('action', $method);

@@ -2,19 +2,15 @@
 
 namespace SamuelPouzet\Api\Controller;
 
-use Laminas\Http\Response;
-use Laminas\Mvc\Controller\AbstractActionController;
+use \SamuelPouzet\Api\Controller\AbstractJsonController;
 use Laminas\View\Model\JsonModel;
-use SamuelPouzet\Api\Adapter\AuthorisationResult;
-use SamuelPouzet\Api\Adapter\Result;
-use SamuelPouzet\Api\Entity\AuthRefreshToken;
 use SamuelPouzet\Api\Service\AuthService;
 use SamuelPouzet\Api\Service\CookieService;
 use SamuelPouzet\Api\Service\JwtService;
 use SamuelPouzet\Api\Service\SessionService;
 use SamuelPouzet\Api\Trait\ParseCookie;
 
-class LogoutController extends AbstractActionController
+class LogoutController extends AbstractJsonController
 {
     use ParseCookie;
 
