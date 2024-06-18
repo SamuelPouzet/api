@@ -15,7 +15,7 @@ class IdentityService
     protected ?IdentityInterface $identity = null;
 
     /**
-     * @param AuthTokenService $tokenService
+     * @param AuthTokenService $tokenServiceAuthenticatedIdentity
      */
     public function __construct(
         protected AuthTokenService $tokenService,
@@ -36,8 +36,6 @@ class IdentityService
             ->setId($credentials->getId())
             ->setUser($credentials)
             ->setRoles($this->roleService->getRolesByList($credentials->getRoles()) ?? []);
-
-        die(var_dump($this->identity));
     }
 
     public function getIdentity(): ?IdentityInterface

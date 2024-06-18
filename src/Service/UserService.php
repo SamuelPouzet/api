@@ -25,6 +25,7 @@ class UserService
     public function getCurrentUser(RequestInterface $request): UserInterface|null
     {
         $cookie = $this->getCookie($request, 'authCookie');
+
         // @todo response au lieu de null pour traitement ultérieur
         if(! $cookie) {
             return null;
@@ -37,15 +38,17 @@ class UserService
         if(! $claim) {
             return null;
         }
-        $identity = $this->sessionService->read($token->claims()->get('access_token'));
+
+        $identity = $this->sessionService->read('purple-connexion');
+
         if(! $identity) {
             return null;
         }
-        $identityUser = $identity->getUser();
+        $identityUser = $identity['login'] ?? null;
         if(! $identityUser) {
             return null;
         }
-        $user = $this->entityManager->getRepository(User::class)->findOneBy(['login' => $identityUser->getLogin()]);
+        $user = $this->entityManager->getRepository(User::class)->findOneBy(['login' => $identityUser]);
         if(! $user) {
             return null;
         }

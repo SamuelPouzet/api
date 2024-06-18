@@ -11,6 +11,10 @@ use SamuelPouzet\Api\Interface\UserInterface;
 class AuthTokenService
 {
 
+    protected string $accessToken;
+    protected string $refreshToken;
+    protected \DateTimeImmutable $accessTokenExpiration;
+
     public function __construct(
         protected array $config,
         protected EntityManager $entityManager,
@@ -18,6 +22,10 @@ class AuthTokenService
         protected CookieService $cookieService,
     )
     {
+        $this->accessToken = $this->generateToken();
+        $this->refreshToken = $this->generateToken();
+        // @todo interval dans la config
+        $this->accessTokenExpiration = (new \DateTimeImmutable() )->add(new \DateInterval('P1M') );
     }
 
     protected function generateToken(): string
@@ -25,24 +33,40 @@ class AuthTokenService
         return bin2hex(random_bytes($this->config['length']));
     }
 
+    /**
+     * @return string
+     */
+    public function getAccessToken(): string
+    {
+        return $this->accessToken;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRefreshToken(): string
+    {
+        return $this->refreshToken;
+    }
+
+    /**
+     * @return \DateTimeImmutable
+     */
+    public function getAccessTokenExpiration(): \DateTimeImmutable
+    {
+        return $this->accessTokenExpiration;
+    }
+
     public function generateTokens(IdentityInterface $identity): JwtService
     {
-        $identity->setAccessToken($this->generateToken());
-        $identity->setRefreshToken($this->generateToken());
 
-        // @todo interval dans la config
-        $expiration = (new \DateTime() )->add(new \DateInterval('P1M') );
-        $identity->setAccessTokenExpiration($expiration);
-
-
-        // @todo ajouter de la sécurité, IP, etc
         return
             $this->jwtService
                 ->build()
                 ->addClaim('login', $identity->getUser()->getLogin())
-                ->addClaim('access_token', $identity->getAccessToken())
-                ->addClaim('access_token_expires_at', $identity->getAccessTokenExpiration()->format('Y-m-d H:i:s'))
-                ->addClaim('refresh_token', $identity->getRefreshToken())
+                ->addClaim('access_token', $this->accessToken)
+                ->addClaim('access_token_expires_at', $this->accessTokenExpiration->format('Y-m-d H:i:s'))
+                ->addClaim('refresh_token', $this->refreshToken)
                 ->setExpiration(new \DateInterval('P1Y'))
             ;
     }
@@ -50,7 +74,7 @@ class AuthTokenService
 
     public function saveRefreshToken(UserInterface $user, \DateInterval $dateInterval, string $token)
     {
-        // @todo déplacer dans le manager ad hoc
+        // @todo déplacer dans le Manager ad hoc
         $entity = new AuthRefreshToken();
         $entity->setUserId($user->getId());
         $entity->setUser($user);
@@ -62,7 +86,7 @@ class AuthTokenService
 
     public function clearRefreshToken(AuthRefreshToken $token)
     {
-        // @todo déplacer dans le manager
+        // @todo déplacer dans le Manager
         $now = new \DateTime();
         $token->setExpires($now);
         $this->entityManager->persist($token);

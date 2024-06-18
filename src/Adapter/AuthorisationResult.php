@@ -2,6 +2,9 @@
 
 namespace SamuelPouzet\Api\Adapter;
 
+
+use Laminas\Http\Response;
+
 /**
  *
  */
@@ -15,27 +18,27 @@ class AuthorisationResult
     /**
      *
      */
-    public const AUTHORIZED = 1;
+    public const AUTHORIZED = Response::STATUS_CODE_200;
     /**
      *
      */
-    public const INVALID_TOKEN = 2;
+    public const INVALID_TOKEN = Response::STATUS_CODE_500;
     /**
      *
      */
-    public const NOT_AUTHORIZED = 3;
+    public const NOT_AUTHORIZED = Response::STATUS_CODE_403;
     /**
      *
      */
-    public const MISSING_CONFIG = 4;
+    public const MISSING_CONFIG = Response::STATUS_CODE_500;
     /**
      *
      */
-    public const NOT_ACTIVATED = 5;
+    public const NOT_ACTIVATED = Response::STATUS_CODE_403;
     /**
      *
      */
-    public const NEEDS_CONNEXION = 6;
+    public const NEEDS_CONNEXION = Response::STATUS_CODE_401;
 
     /**
      * @var int

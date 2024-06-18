@@ -50,7 +50,6 @@ class AuthorizationService
             $result->setResponseMessage('No controller config provided and disallowed by default');
             return $result;
         }
-
         $method = strtolower((string)$routeMatch->getParam('action'));
         $config = $config[$method] ?? null;
         //config not found

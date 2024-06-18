@@ -35,6 +35,9 @@ class Role
     #[ORM\InverseJoinColumn(name: "child_id", referencedColumnName: "id")]
     protected PersistentCollection $childRoles;
 
+    #[ORM\ManyToMany(targetEntity: Permission::class, mappedBy: "childRoles")]
+    private PersistentCollection $permissions;
+
     /**
      * Constructor.
      */
@@ -98,6 +101,11 @@ class Role
     {
         $this->childRoles = $childRoles;
         return $this;
+    }
+
+    public function getPermissions(): PersistentCollection
+    {
+        return $this->permissions;
     }
 
 }

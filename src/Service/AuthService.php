@@ -5,11 +5,15 @@ namespace SamuelPouzet\Api\Service;
 use Doctrine\ORM\EntityManager;
 use Laminas\Crypt\Password\Bcrypt;
 use Laminas\Http\Response;
+use Lcobucci\JWT\Token\Plain;
 use SamuelPouzet\Api\Adapter\AuthenticatedIdentity;
 use SamuelPouzet\Api\Adapter\Result;
 use SamuelPouzet\Api\Entity\AuthRefreshToken;
+use SamuelPouzet\Api\Interface\AuthServiceInterface;
+use SamuelPouzet\Api\Interface\IdentityInterface;
+use SamuelPouzet\Api\Interface\UserInterface;
 
-class AuthService
+class AuthService implements AuthServiceInterface
 {
     public function __construct(
         protected IdentityService $identityService,
@@ -24,7 +28,7 @@ class AuthService
     {
         $result = new Result();
         try {
-            $challengeUser = $this->entityManager->getRepository($this->userEntity)->findOneBy(['login' => $credentials['login']]);
+            $challengeUser = $this->getUser($credentials);
             if (!$challengeUser) {
                 return $result
                     ->setMessage(sprintf('user not found : %1$s', $credentials['login']))
@@ -49,18 +53,15 @@ class AuthService
 
     }
 
-    public function refresh(array $postData): Result
+    public function clear(string $oldAccessToken): void
     {
+        $this->sessionService->remove($oldAccessToken);
+    }
 
+    public function refresh(string $token): Result
+    {
         $result = new Result();
 
-        if (! isset($postData['token'])) {
-            return $result
-                ->setMessage(sprintf('token not found'))
-                ->setCode(401);
-        }
-
-        $token = $postData['token'];
         $refreshToken = $this->entityManager->getRepository(AuthRefreshToken::class)->findOneBy([
             'refreshToken' => $token,
         ]);
@@ -69,29 +70,32 @@ class AuthService
         if (! $refreshToken) {
             return $result
                 ->setMessage(sprintf('invalid token : %1$s', $token))
-                ->setCode(401);
+                ->setCode(Response::STATUS_CODE_403);
         }
 
         $now = new \DateTimeImmutable();
         if ($refreshToken->getExpires() <= $now) {
             return $result
                 ->setMessage(sprintf('token expired: %1$s', $token))
-                ->setCode(401);
+                ->setCode(Response::STATUS_CODE_403);
         }
 
         $this->identityService->closeIdentity($refreshToken);
-        $identity = $this->identityService->createIdentity($refreshToken->getUser());
-        $this->sessionService->write($identity->getBearerToken(), $identity);
 
         return $result
             ->setMessage('Access granted')
             ->setCode(Response::STATUS_CODE_200)
-            ->setIdentity($identity);
+            ->setUser($refreshToken->getUser());
 
     }
 
-    public function saveIdentity(AuthenticatedIdentity $identity): void
+    protected function getUser(array $credentials): ?UserInterface
     {
-        $this->sessionService->write($identity->getAccessToken(), $identity);
+        return $this->entityManager->getRepository($this->userEntity)->findOneBy(['login' => $credentials['login']]);
+    }
+
+    public function saveIdentity(string $name, IdentityInterface $identity): void
+    {
+        $this->sessionService->write($name, $identity->exportIdentity());
     }
 }

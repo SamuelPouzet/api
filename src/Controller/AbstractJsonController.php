@@ -22,4 +22,9 @@ abstract class AbstractJsonController extends AbstractActionController
     {
         return $this->myUser();
     }
+
+    protected function getPostData(): array
+    {
+        return json_decode(file_get_contents("php://input"), true);
+    }
 }

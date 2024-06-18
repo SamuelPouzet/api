@@ -16,7 +16,8 @@ class AuthorizationListener
 
     public function __construct(
         protected AuthorizationService $authorizationService
-    ) {
+    )
+    {
     }
 
     public function attach(EventManagerInterface $events, int $priority = 1): void
@@ -36,22 +37,26 @@ class AuthorizationListener
         if (AuthorisationResult::AUTHORIZED !== $auth->getStatus()) {
             $routeMatch->setParam('controller', ErrorController::class);
             $routeMatch->setParam('action', 'error');
-            $routeMatch->setParam('statusCode', 403);
+            $routeMatch->setParam('statusCode', $auth->getStatus());
             $routeMatch->setParam('message', $auth->getResponseMessage());
             return;
         }
-        $this->api($event);
+        try {
+            $this->api($event);
+        } catch (\Exception $exception) {
+            // @todo
+            die($exception->getMessage());
+        }
     }
 
     protected function api(MvcEvent $event)
     {
-        $request = $event->getApplication()->getRequest();
-        $method = strtolower($request->getMethod());
         $routeMatch = $event->getRouteMatch();
         $controller = $routeMatch->getParam('controller');
+        $method = $routeMatch->getParam('action');
 
-        if (! method_exists($controller, $method . 'Action')) {
-            throw new MethodNotFoundException(sprintf('Method %1$s doesn\'exists in class %1$s', $method, $controller));
+        if (!method_exists($controller, $method . 'Action')) {
+            throw new MethodNotFoundException(sprintf('Method %1$s doesn\'exists in class %2$s', $method, $controller));
         }
         $routeMatch->setParam('action', $method);
     }

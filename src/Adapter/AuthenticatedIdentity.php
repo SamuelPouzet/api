@@ -23,15 +23,6 @@ class AuthenticatedIdentity implements IdentityInterface
      */
     protected array $roles;
 
-    /**
-     * @var ?string
-     */
-    protected ?string $access_token;
-
-    /**
-     * @var ?\DateTime
-     */
-    protected ?\DateTime $access_token_expiration;
 
     /**
      * @var ?string
@@ -90,8 +81,6 @@ class AuthenticatedIdentity implements IdentityInterface
         return $this;
     }
 
-
-
     public function getRoles(): array
     {
         return $this->roles;
@@ -100,39 +89,6 @@ class AuthenticatedIdentity implements IdentityInterface
     public function setRoles(array $roles): AuthenticatedIdentity
     {
         $this->roles = $roles;
-        return $this;
-    }
-
-    public function getAccessToken(): string
-    {
-        return $this->access_token;
-    }
-
-    public function setAccessToken(string $access_token): AuthenticatedIdentity
-    {
-        $this->access_token = $access_token;
-        return $this;
-    }
-
-    public function getAccessTokenExpiration(): \DateTime
-    {
-        return $this->access_token_expiration;
-    }
-
-    public function setAccessTokenExpiration(\DateTime $access_token_expiration): AuthenticatedIdentity
-    {
-        $this->access_token_expiration = $access_token_expiration;
-        return $this;
-    }
-
-    public function getRefreshToken(): string
-    {
-        return $this->refresh_token;
-    }
-
-    public function setRefreshToken(string $refresh_token): AuthenticatedIdentity
-    {
-        $this->refresh_token = $refresh_token;
         return $this;
     }
 

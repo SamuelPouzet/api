@@ -21,14 +21,19 @@ class CookieService
         $cookie = new SetCookie(
             $name,
             $value,
-            $expires = ((new \DateTime())->add(new \DateInterval('P1D')))->format('Y-m-d H:i:s'),
+            ((new \DateTime())->add(new \DateInterval('P1Y')))->format('Y-m-d H:i:s'),
             null,
             null,
             false,
-            false
+            false,
+            null,
+            null,
+            'None'
         );
 
         $response->getHeaders()->addHeader($cookie);
     }
+
+
 
 }

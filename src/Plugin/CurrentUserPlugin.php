@@ -2,7 +2,9 @@
 
 namespace SamuelPouzet\Api\Plugin;
 
+use Doctrine\ORM\EntityManager;
 use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
+use SamuelPouzet\Api\Entity\User;
 use SamuelPouzet\Api\Interface\UserInterface;
 use SamuelPouzet\Api\Service\IdentityService;
 use SamuelPouzet\Api\Service\UserService;
@@ -13,6 +15,8 @@ class CurrentUserPlugin extends AbstractPlugin
 
     public function __construct(
         protected IdentityService $identityService,
+        protected EntityManager $entityManager,
+        protected string $userEntity,
     )
     {
 
@@ -29,8 +33,8 @@ class CurrentUserPlugin extends AbstractPlugin
         if ($this->user) {
             return $this->user;
         }
-        $this->user = $this->identityService->getIdentity()->getUser();
-
+        $id = $this->identityService->getIdentity()->getId();
+        $this->user = $this->entityManager->getRepository($this->userEntity)->find($id);
         return $this->user;
     }
 

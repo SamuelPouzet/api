@@ -20,6 +20,7 @@ use SamuelPouzet\Api\Controller\Factories\RefreshControllerFactory;
 use SamuelPouzet\Api\Controller\LogoutController;
 use SamuelPouzet\Api\Controller\RefreshController;
 use SamuelPouzet\Api\Entity\User;
+use SamuelPouzet\Api\Form\AuthForm;
 use SamuelPouzet\Api\Interface\UserInterface;
 use SamuelPouzet\Api\Listener\ApiListener;
 use SamuelPouzet\Api\Listener\AuthenticationErrorListener;
@@ -41,6 +42,10 @@ use SamuelPouzet\Api\Plugin\ApiProblemPlugin;
 use SamuelPouzet\Api\Plugin\CurrentUserPlugin;
 use SamuelPouzet\Api\Plugin\Factory\ApiProblemPluginFactory;
 use SamuelPouzet\Api\Plugin\Factory\CurrentUserPluginFactory;
+use SamuelPouzet\Api\Plugin\Factory\GetUserFactory;
+use SamuelPouzet\Api\Plugin\Factory\GetUserPluginFactory;
+use SamuelPouzet\Api\Plugin\GetUser;
+use SamuelPouzet\Api\Plugin\GetUserPlugin;
 use SamuelPouzet\Api\Service\AuthorizationService;
 use SamuelPouzet\Api\Service\AuthService;
 use SamuelPouzet\Api\Service\AuthTokenService;
@@ -101,7 +106,7 @@ return [
     'listeners' => [
         ApiListener::class,
         AuthorizationListener::class,
-        // AuthorisationErrorListener::class,
+        AuthorisationErrorListener::class,
     ],
     'controllers' => [
         'factories' => [
@@ -113,12 +118,12 @@ return [
     ],
     'controller_plugins' => [
         'factories' => [
-            ApiProblemPlugin::class => ApiProblemPluginFactory::class,
             CurrentUserPlugin::class => CurrentUserPluginFactory::class,
+            GetUserPlugin::class => GetUserPluginFactory::class,
         ],
         'aliases' => [
-            'apiProblem' => ApiProblemPlugin::class,
             'myUser' => CurrentUserPlugin::class,
+            'getUser' => GetUserPlugin::class,
         ],
     ],
     'service_manager' => [
@@ -139,6 +144,7 @@ return [
             RefreshTokenManager::class => RefreshTokenManagerFactory::class,
         ],
         'aliases' => [
+            'auth.service' => AuthService::class,
             'identity.service' => IdentityService::class,
             'user.service' => UserService::class,
             'role.service' => RoleService::class,
@@ -146,6 +152,9 @@ return [
     ],
     'entities' => [
         'user' => User::class,
+    ],
+    'form' => [
+        'auth.form' => AuthForm::class,
     ],
     'view_manager' => [
         'strategies' => [
@@ -208,15 +217,17 @@ return [
     ],
     // Session configuration.
     'session_config' => [
-        'cookie_lifetime' => 60 * 60 * 1, // Session cookie will expire in 1 hour.
-        'gc_maxlifetime' => 60 * 60 * 24 * 30, // How long to store session data on server (for 1 month).
-        'cookie_secure' => false,
         'save_path' => dirname(__DIR__, 1) . '/data/session',
         'use_cookies' => true,
+        'gc_probability' => 100,
+        'cookie_secure' => false,
+        'cookie_samesite' => false,
+        'cookie_lifetime' => 60 * 60 * 1, // Session cookie will expire in 1 hour.
+        'gc_maxlifetime' => 60 * 60 * 24 * 30, // How long to store session data on server (for 1 month).
+        'name' => 'purple-auth',
     ],
     // Session manager configuration.
     'session_manager' => [
-        // Session validators (used for security).
         'validators' => [
             RemoteAddr::class,
             HttpUserAgent::class,

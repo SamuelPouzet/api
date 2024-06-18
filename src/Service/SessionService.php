@@ -3,7 +3,6 @@
 namespace SamuelPouzet\Api\Service;
 
 use Laminas\Session\Container;
-use Laminas\Session\SessionManager;
 
 #[\AllowDynamicProperties]
 class SessionService
@@ -18,7 +17,6 @@ class SessionService
     public function write(string $key, mixed $value): self
     {
         $this->sessionContainer->$key = $value;
-
         return $this;
     }
 
@@ -29,6 +27,6 @@ class SessionService
 
     public function remove(string $key): void
     {
-        $this->sessionContainer->getManager()->getStorage()->clear($key);
+        unset($this->sessionContainer->$key);
     }
 }

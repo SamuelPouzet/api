@@ -8,7 +8,6 @@ use Psr\Container\ContainerInterface;
 use SamuelPouzet\Api\Entity\User;
 use SamuelPouzet\Api\Manager\TokenManager;
 use SamuelPouzet\Api\Service\AuthService;
-use SamuelPouzet\Api\Service\IdentityService;
 use SamuelPouzet\Api\Service\SessionService;
 
 class AuthServiceFactory implements FactoryInterface

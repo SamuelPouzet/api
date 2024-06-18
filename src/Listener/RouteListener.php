@@ -41,7 +41,7 @@ class RouteListener
             $routeMatch->setParam('controller', ErrorController::class);
             $routeMatch->setParam('action', 'error');
             $routeMatch->setParam('statusCode', 404);
-            $routeMatch->setParam('message', 'Method %1$s doesn\'exists in class %1$s', $method, $controller);
+            $routeMatch->setParam('message', sprintf('Method %1$s doesn\'exists in class %2$s', $method, $controller));
             return;
         }
         $routeMatch->setParam('action', $method);
@@ -51,7 +51,7 @@ class RouteListener
     {
         $request = $event->getApplication()->getRequest();
         $method = strtolower($request->getMethod());
-        if($method === 'get' || $method === 'GET') {
+        if(strtolower($method) === 'get') {
             if (null === $event->getRouteMatch()->getParam('id')) {
                 $method = 'getAll';
             }
